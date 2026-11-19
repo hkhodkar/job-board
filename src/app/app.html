@@ -1,0 +1,61 @@
+<header class="header">
+  <div class="container header-inner">
+    <a routerLink="/jobs" class="brand" aria-label="Hireline home">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="9" fill="#2952e3" />
+        <path d="M10 9v14M22 9v14M10 16h12" stroke="#fff" stroke-width="3" stroke-linecap="round" />
+        <circle cx="25.5" cy="7" r="3.5" fill="#34d399" stroke="#fff" stroke-width="1.5" />
+      </svg>
+      <span>Hireline</span>
+    </a>
+
+    <nav class="nav" [class.open]="menuOpen()" aria-label="Main">
+      <a routerLink="/jobs" routerLinkActive="active" class="nav-link">Find jobs</a>
+      <a routerLink="/saved" routerLinkActive="active" class="nav-link">
+        Saved jobs
+        @if (saved.count()) {
+          <span class="count">{{ saved.count() }}</span>
+        }
+      </a>
+      <a routerLink="/applications" routerLinkActive="active" class="nav-link">
+        My applications
+        @if (applications.count()) {
+          <span class="count">{{ applications.count() }}</span>
+        }
+      </a>
+      <a routerLink="/employer" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" class="nav-link">
+        My job posts
+        @if (posted.jobs().length) {
+          <span class="count">{{ posted.jobs().length }}</span>
+        }
+      </a>
+      <a routerLink="/employer/new" class="btn btn-primary post-btn">
+        <app-icon name="plus" />
+        Post a job
+      </a>
+    </nav>
+
+    <button
+      type="button"
+      class="icon-btn menu-btn"
+      [attr.aria-expanded]="menuOpen()"
+      aria-label="Toggle menu"
+      (click)="toggleMenu()"
+    >
+      <app-icon [name]="menuOpen() ? 'x' : 'menu'" />
+    </button>
+  </div>
+</header>
+
+<main>
+  <router-outlet />
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <span>© {{ year }} Hireline · Demo job board with fictional companies</span>
+    <span>Saved jobs, applications and posts stay in your browser.</span>
+  </div>
+</footer>
+
+<app-toasts />

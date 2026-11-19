@@ -1,0 +1,207 @@
+<section class="hero">
+  <div class="container">
+    <h1>Find a job you’ll actually enjoy</h1>
+    <p class="lead">
+      {{ allJobs().length }} open roles from {{ companyCount() }} companies · {{ remoteCount() }} fully remote
+    </p>
+
+    <form class="search" role="search" (submit)="search($event)">
+      <label class="search-field">
+        <app-icon name="search" />
+        <span class="sr-only">Keyword</span>
+        <input
+          id="keyword"
+          type="search"
+          placeholder="Job title, skill or company"
+          autocomplete="off"
+          [formControl]="keyword"
+        />
+      </label>
+      <label class="search-field">
+        <app-icon name="pin" />
+        <span class="sr-only">Location</span>
+        <input id="location" type="search" placeholder="City, country or “remote”" autocomplete="off" [formControl]="location" />
+      </label>
+      <button type="submit" class="btn btn-primary btn-lg">Search</button>
+    </form>
+  </div>
+</section>
+
+<div class="container layout">
+  <div class="mobile-bar">
+    <button type="button" class="btn btn-outline filters-toggle" [attr.aria-expanded]="filtersOpen()" (click)="toggleFilters()">
+      <app-icon name="filter" />
+      {{ filtersOpen() ? 'Hide filters' : 'Filters' }}
+      @if (activeCount()) {
+        <span class="badge badge-primary">{{ activeCount() }}</span>
+      }
+    </button>
+  </div>
+
+  <aside class="filters card" [class.open]="filtersOpen()" aria-label="Filters">
+    <div class="filters-head">
+      <h2>Filters</h2>
+      @if (activeCount()) {
+        <button type="button" class="btn btn-ghost btn-sm" (click)="clearAll()">Clear all</button>
+      }
+    </div>
+
+    <fieldset class="group">
+      <legend>Work mode</legend>
+      @for (o of modes; track o.value) {
+        <label class="check">
+          <input type="checkbox" [checked]="isChecked('modes', o.value)" (change)="toggle('modes', o.value)" />
+          {{ o.label }}
+          <span class="count">{{ countFor('modes', o.value) }}</span>
+        </label>
+      }
+    </fieldset>
+
+    <fieldset class="group">
+      <legend>Job type</legend>
+      @for (o of types; track o.value) {
+        <label class="check">
+          <input type="checkbox" [checked]="isChecked('types', o.value)" (change)="toggle('types', o.value)" />
+          {{ o.label }}
+          <span class="count">{{ countFor('types', o.value) }}</span>
+        </label>
+      }
+    </fieldset>
+
+    <fieldset class="group">
+      <legend>Experience level</legend>
+      @for (o of levels; track o.value) {
+        <label class="check">
+          <input type="checkbox" [checked]="isChecked('levels', o.value)" (change)="toggle('levels', o.value)" />
+          {{ o.label }}
+          <span class="count">{{ countFor('levels', o.value) }}</span>
+        </label>
+      }
+    </fieldset>
+
+    <div class="group field">
+      <label class="label" for="category">Category</label>
+      <select id="category" class="select" (change)="setCategory(categorySelect.value)" #categorySelect>
+        <option value="" [selected]="!filters().category">All categories</option>
+        @for (o of categories; track o.value) {
+          <option [value]="o.value" [selected]="filters().category === o.value">{{ o.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="group field">
+      <span class="label" id="salary-label">Salary range <span class="optional">(USD / year)</span></span>
+      <div class="salary-row" role="group" aria-labelledby="salary-label">
+        <div class="input-affix">
+          <span class="affix">$</span>
+          <input
+            id="salary-min"
+            class="input"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            placeholder="Min"
+            aria-label="Minimum salary in thousands"
+            [class.invalid]="salaryInvalid()"
+            [formControl]="salaryMin"
+          />
+          <span class="affix-end">k</span>
+        </div>
+        <span class="dash">–</span>
+        <div class="input-affix">
+          <span class="affix">$</span>
+          <input
+            id="salary-max"
+            class="input"
+            type="number"
+            inputmode="numeric"
+            min="0"
+            placeholder="Max"
+            aria-label="Maximum salary in thousands"
+            [class.invalid]="salaryInvalid()"
+            [formControl]="salaryMax"
+          />
+          <span class="affix-end">k</span>
+        </div>
+      </div>
+      @if (salaryInvalid()) {
+        <span class="error">Minimum is higher than maximum.</span>
+      } @else {
+        <span class="hint">In thousands, e.g. 60 – 120</span>
+      }
+    </div>
+
+    <div class="group field">
+      <label class="label" for="posted">Date posted</label>
+      <select id="posted" class="select" (change)="setPosted(postedSelect.value)" #postedSelect>
+        <option value="" [selected]="!filters().postedWithin">Any time</option>
+        @for (o of postedOptions; track o.value) {
+          <option [value]="o.value" [selected]="filters().postedWithin === o.value">{{ o.label }}</option>
+        }
+      </select>
+    </div>
+
+    <button type="button" class="btn btn-primary btn-block apply-mobile" (click)="toggleFilters()">
+      Show {{ results().length }} {{ results().length === 1 ? 'job' : 'jobs' }}
+    </button>
+  </aside>
+
+  <section class="results" aria-live="polite">
+    <div class="results-head">
+      <div>
+        <h2>
+          {{ results().length }} {{ results().length === 1 ? 'job' : 'jobs' }}
+          @if (activeCount()) {
+            <span class="muted">match your filters</span>
+          }
+        </h2>
+      </div>
+      <div class="results-tools">
+        <label class="sort">
+          <span>Sort by</span>
+          <select class="select" id="sort" (change)="setSort(sortSelect.value)" #sortSelect>
+            @for (o of sortOptions; track o.value) {
+              <option [value]="o.value" [selected]="filters().sort === o.value">{{ o.label }}</option>
+            }
+          </select>
+        </label>
+      </div>
+    </div>
+
+    @if (chips().length) {
+      <div class="chips">
+        @for (chip of chips(); track chip.label) {
+          <button type="button" class="chip" (click)="removeChip(chip)" [attr.aria-label]="'Remove filter ' + chip.label">
+            {{ chip.label }}
+            <app-icon name="x" [size]="14" />
+          </button>
+        }
+        <button type="button" class="chip-clear" (click)="clearAll()">Clear all</button>
+      </div>
+    }
+
+    @if (results().length) {
+      <div class="list">
+        @for (job of page(); track job.id) {
+          <app-job-card [job]="job" />
+        }
+      </div>
+      @if (results().length > page().length) {
+        <div class="more">
+          <button type="button" class="btn btn-outline" (click)="showMore()">
+            Show more jobs ({{ results().length - page().length }} left)
+          </button>
+        </div>
+      }
+    } @else {
+      <app-empty-state
+        icon="search"
+        title="No jobs match these filters"
+        text="Try removing a filter or searching for a broader keyword. New roles are added every week."
+      >
+        <button type="button" class="btn btn-primary" (click)="clearAll()">Clear all filters</button>
+        <a routerLink="/employer/new" class="btn btn-outline">Post a job</a>
+      </app-empty-state>
+    }
+  </section>
+</div>
