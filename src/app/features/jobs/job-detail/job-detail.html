@@ -1,0 +1,190 @@
+<div class="container page">
+  <a routerLink="/jobs" class="back-link"><app-icon name="arrow-left" />All jobs</a>
+
+  @if (job(); as j) {
+    <div class="layout">
+      <div class="main">
+        <section class="card head">
+          <div class="head-top">
+            <app-company-logo [name]="j.company.name" [color]="j.company.color" [size]="64" />
+            <div class="head-text">
+              <div class="badges">
+                @if (j.isOwn) {
+                  <span class="badge badge-new">New</span>
+                  <span class="badge">Your post</span>
+                }
+                <span class="badge badge-primary">{{ j.category | optionLabel: 'category' }}</span>
+              </div>
+              <h1>{{ j.title }}</h1>
+              <p class="company">{{ j.company.name }}</p>
+            </div>
+          </div>
+
+          <div class="meta">
+            <span><app-icon name="pin" />{{ j.location }}</span>
+            <span><app-icon name="globe" />{{ j.workMode | optionLabel: 'mode' }}</span>
+            <span><app-icon name="briefcase" />{{ j.type | optionLabel: 'type' }}</span>
+            <span><app-icon name="layers" />{{ j.level | optionLabel: 'level' }}</span>
+            <span><app-icon name="clock" />Posted {{ j.postedAt | timeAgo }}</span>
+          </div>
+
+          <div class="head-bottom">
+            <div class="salary">
+              <span class="salary-value">{{ j.salaryMin | salary: j.salaryMax }}</span>
+              <span class="salary-unit">per year</span>
+            </div>
+            <div class="actions">
+              <button
+                type="button"
+                class="btn btn-outline btn-lg"
+                [class.saved]="isSaved()"
+                [attr.aria-pressed]="isSaved()"
+                (click)="toggleSave()"
+              >
+                <app-icon [name]="isSaved() ? 'bookmark-filled' : 'bookmark'" />
+                {{ isSaved() ? 'Saved' : 'Save' }}
+              </button>
+              @if (application(); as a) {
+                <a routerLink="/applications" class="btn btn-lg applied">
+                  <app-icon name="check-circle" />
+                  Applied {{ a.appliedAt | date: 'MMM d' }}
+                </a>
+              } @else {
+                <a [routerLink]="['/jobs', j.id, 'apply']" class="btn btn-primary btn-lg">
+                  Apply now
+                  <app-icon name="arrow-right" />
+                </a>
+              }
+            </div>
+          </div>
+        </section>
+
+        <section class="card content">
+          <h2>About the role</h2>
+          <p class="summary">{{ j.summary }}</p>
+
+          @if (j.responsibilities.length) {
+            <h2>What you’ll do</h2>
+            <ul>
+              @for (item of j.responsibilities; track $index) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          }
+
+          @if (j.requirements.length) {
+            <h2>What we’re looking for</h2>
+            <ul>
+              @for (item of j.requirements; track $index) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          }
+
+          @if (j.niceToHave.length) {
+            <h2>Nice to have</h2>
+            <ul>
+              @for (item of j.niceToHave; track $index) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          }
+
+          @if (j.benefits.length) {
+            <h2>Benefits</h2>
+            <ul class="benefits">
+              @for (item of j.benefits; track $index) {
+                <li><app-icon name="check" [size]="16" />{{ item }}</li>
+              }
+            </ul>
+          }
+
+          @if (j.tags.length) {
+            <h2>Skills</h2>
+            <div class="tags">
+              @for (tag of j.tags; track tag) {
+                <span class="tag">{{ tag }}</span>
+              }
+            </div>
+          }
+        </section>
+      </div>
+
+      <aside class="side">
+        <section class="card overview">
+          <h2>Job overview</h2>
+          <dl>
+            <div><dt>Salary</dt><dd>{{ j.salaryMin | salary: j.salaryMax }} / year</dd></div>
+            <div><dt>Job type</dt><dd>{{ j.type | optionLabel: 'type' }}</dd></div>
+            <div><dt>Work mode</dt><dd>{{ j.workMode | optionLabel: 'mode' }}</dd></div>
+            <div><dt>Experience</dt><dd>{{ j.level | optionLabel: 'level' }}</dd></div>
+            <div><dt>Category</dt><dd>{{ j.category | optionLabel: 'category' }}</dd></div>
+            <div><dt>Posted</dt><dd>{{ j.postedAt | date: 'MMM d, y' }}</dd></div>
+            <div><dt>Applicants</dt><dd>{{ j.applicants ?? 0 }}</dd></div>
+          </dl>
+        </section>
+
+        <section class="card company-card">
+          <div class="company-head">
+            <app-company-logo [name]="j.company.name" [color]="j.company.color" [size]="48" />
+            <div>
+              <h2>{{ j.company.name }}</h2>
+              <p class="muted">{{ j.company.industry }}</p>
+            </div>
+          </div>
+          <p class="about">{{ j.company.about }}</p>
+          <ul class="facts">
+            <li><app-icon name="users" [size]="16" />{{ j.company.size }}</li>
+            <li><app-icon name="building" [size]="16" />{{ j.company.headquarters }}</li>
+            @if (j.company.founded) {
+              <li><app-icon name="clock" [size]="16" />Founded {{ j.company.founded }}</li>
+            }
+            @if (j.company.website) {
+              <li><app-icon name="globe" [size]="16" />{{ j.company.website }}</li>
+            }
+          </ul>
+        </section>
+
+        @if (j.isOwn) {
+          <section class="card owner">
+            <h2>Manage this post</h2>
+            <p class="muted">Only you can see these actions.</p>
+            <div class="owner-actions">
+              <a [routerLink]="['/employer', j.id, 'edit']" class="btn btn-outline"><app-icon name="edit" />Edit</a>
+              <button type="button" class="btn btn-danger-outline" (click)="askDelete()"><app-icon name="trash" />Delete</button>
+            </div>
+          </section>
+        }
+      </aside>
+    </div>
+
+    @if (similar().length) {
+      <section class="similar">
+        <h2>Similar jobs</h2>
+        <div class="similar-grid">
+          @for (s of similar(); track s.id) {
+            <app-job-card [job]="s" [compact]="true" />
+          }
+        </div>
+      </section>
+    }
+
+    @if (confirmDelete()) {
+      <app-confirm-dialog
+        title="Delete this job post?"
+        [message]="'“' + j.title + '” will be removed from the job board. This cannot be undone.'"
+        confirmLabel="Delete post"
+        (confirmed)="deletePost()"
+        (cancelled)="cancelDelete()"
+      />
+    }
+  } @else {
+    <app-empty-state
+      icon="search"
+      title="This job is no longer available"
+      text="It may have been filled or removed by the employer. Have a look at the other open roles."
+    >
+      <a routerLink="/jobs" class="btn btn-primary">Browse jobs</a>
+    </app-empty-state>
+  }
+</div>

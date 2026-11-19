@@ -1,0 +1,225 @@
+<div class="container page">
+  @if (job(); as j) {
+    <a [routerLink]="['/jobs', j.id]" class="back-link"><app-icon name="arrow-left" />Back to job</a>
+
+    <div class="layout">
+      <div class="main">
+        @if (result(); as r) {
+          <section class="card success" role="status">
+            <span class="success-icon"><app-icon name="check" [size]="30" /></span>
+            <h1>Application sent!</h1>
+            <p>
+              Your application for <strong>{{ j.title }}</strong> at <strong>{{ j.company.name }}</strong> is on its way.
+              We sent a confirmation to <strong>{{ r.email }}</strong>.
+            </p>
+            <div class="sent-file">
+              <app-icon name="file" />
+              <span>{{ r.cvName }}</span>
+              <span class="muted">{{ r.cvSize | fileSize }}</span>
+            </div>
+            <div class="next">
+              <h2>What happens next</h2>
+              <ol>
+                <li>The hiring team reviews applications within about a week.</li>
+                <li>If it’s a match, they’ll reach out by email to plan a first call.</li>
+                <li>You can track this application under “My applications”.</li>
+              </ol>
+            </div>
+            <div class="success-actions">
+              <a routerLink="/applications" class="btn btn-primary">View my applications</a>
+              <a routerLink="/jobs" class="btn btn-outline">Browse more jobs</a>
+            </div>
+          </section>
+        } @else if (existing(); as a) {
+          <section class="card already">
+            <span class="success-icon"><app-icon name="check-circle" [size]="28" /></span>
+            <h1>You already applied</h1>
+            <p>You applied for this job on {{ a.appliedAt | date: 'MMMM d, y' }} with {{ a.cvName }}.</p>
+            <div class="success-actions">
+              <a routerLink="/applications" class="btn btn-primary">View my applications</a>
+              <a routerLink="/jobs" class="btn btn-outline">Browse more jobs</a>
+            </div>
+          </section>
+        } @else {
+          <form class="apply-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <div class="form-title">
+              <h1>Apply for {{ j.title }}</h1>
+              <p>Fields marked <span class="req">*</span> are required. It takes about 3 minutes.</p>
+            </div>
+
+            <section class="card form-section">
+              <h2>Your details</h2>
+              <p class="section-desc">How the hiring team can reach you.</p>
+              <div class="form-grid">
+                <div class="field">
+                  <label class="label" for="name">Full name <span class="req">*</span></label>
+                  <input
+                    id="name"
+                    class="input"
+                    type="text"
+                    formControlName="name"
+                    autocomplete="name"
+                    placeholder="Jane Doe"
+                    [class.invalid]="showError('name')"
+                    [attr.aria-invalid]="showError('name')"
+                    aria-describedby="name-error"
+                  />
+                  @if (showError('name')) {
+                    <span class="error" id="name-error">{{ errorText('name') }}</span>
+                  }
+                </div>
+
+                <div class="form-row">
+                  <div class="field">
+                    <label class="label" for="email">Email <span class="req">*</span></label>
+                    <input
+                      id="email"
+                      class="input"
+                      type="email"
+                      formControlName="email"
+                      autocomplete="email"
+                      placeholder="jane@example.com"
+                      [class.invalid]="showError('email')"
+                      [attr.aria-invalid]="showError('email')"
+                      aria-describedby="email-error"
+                    />
+                    @if (showError('email')) {
+                      <span class="error" id="email-error">{{ errorText('email') }}</span>
+                    }
+                  </div>
+                  <div class="field">
+                    <label class="label" for="phone">Phone <span class="optional">(optional)</span></label>
+                    <input
+                      id="phone"
+                      class="input"
+                      type="tel"
+                      formControlName="phone"
+                      autocomplete="tel"
+                      placeholder="+1 555 010 2030"
+                      [class.invalid]="showError('phone')"
+                      [attr.aria-invalid]="showError('phone')"
+                      aria-describedby="phone-error"
+                    />
+                    @if (showError('phone')) {
+                      <span class="error" id="phone-error">{{ errorText('phone') }}</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="field">
+                    <label class="label" for="linkedin">LinkedIn profile <span class="optional">(optional)</span></label>
+                    <input
+                      id="linkedin"
+                      class="input"
+                      type="url"
+                      formControlName="linkedin"
+                      placeholder="https://www.linkedin.com/in/jane-doe"
+                      [class.invalid]="showError('linkedin')"
+                      [attr.aria-invalid]="showError('linkedin')"
+                      aria-describedby="linkedin-error"
+                    />
+                    @if (showError('linkedin')) {
+                      <span class="error" id="linkedin-error">{{ errorText('linkedin') }}</span>
+                    }
+                  </div>
+                  <div class="field">
+                    <label class="label" for="portfolio">Portfolio or website <span class="optional">(optional)</span></label>
+                    <input
+                      id="portfolio"
+                      class="input"
+                      type="url"
+                      formControlName="portfolio"
+                      placeholder="https://janedoe.dev"
+                      [class.invalid]="showError('portfolio')"
+                      [attr.aria-invalid]="showError('portfolio')"
+                      aria-describedby="portfolio-error"
+                    />
+                    @if (showError('portfolio')) {
+                      <span class="error" id="portfolio-error">{{ errorText('portfolio') }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card form-section">
+              <h2>CV and cover letter</h2>
+              <p class="section-desc">Tell {{ j.company.name }} why you’d be a great fit.</p>
+              <div class="form-grid">
+                <div class="field cv-field" [class.invalid]="showError('cv')">
+                  <label class="label" for="cv-input">CV / résumé <span class="req">*</span></label>
+                  <app-file-drop
+                    formControlName="cv"
+                    inputId="cv-input"
+                    [accept]="accept"
+                    [hint]="'PDF, DOC or DOCX · max ' + maxSizeLabel"
+                    [invalid]="showError('cv')"
+                  />
+                  @if (showError('cv')) {
+                    <span class="error" id="cv-error" role="alert"><app-icon name="alert" [size]="16" />{{ errorText('cv') }}</span>
+                  }
+                </div>
+
+                <div class="field">
+                  <label class="label" for="coverLetter">Cover letter <span class="req">*</span></label>
+                  <textarea
+                    id="coverLetter"
+                    class="textarea"
+                    rows="8"
+                    formControlName="coverLetter"
+                    placeholder="A few paragraphs about your experience and why this role interests you."
+                    [class.invalid]="showError('coverLetter')"
+                    [attr.aria-invalid]="showError('coverLetter')"
+                    aria-describedby="cover-help"
+                  ></textarea>
+                  <div class="field-footer" id="cover-help">
+                    @if (showError('coverLetter')) {
+                      <span class="error">{{ errorText('coverLetter') }}</span>
+                    } @else {
+                      <span class="hint">At least {{ coverMin }} characters.</span>
+                    }
+                    <span class="counter" [class.over]="coverLength() > coverMax">{{ coverLength() }} / {{ coverMax }}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div class="submit-bar">
+              <a [routerLink]="['/jobs', j.id]" class="btn btn-ghost btn-lg">Cancel</a>
+              <button type="submit" class="btn btn-primary btn-lg" [disabled]="sending()">
+                @if (sending()) {
+                  <span class="spinner" aria-hidden="true"></span>
+                  Sending…
+                } @else {
+                  <app-icon name="send" />
+                  Submit application
+                }
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+
+      <aside class="card job-summary">
+        <div class="summary-head">
+          <app-company-logo [name]="j.company.name" [color]="j.company.color" [size]="48" />
+          <div>
+            <h2>{{ j.title }}</h2>
+            <p class="muted">{{ j.company.name }}</p>
+          </div>
+        </div>
+        <ul>
+          <li><app-icon name="pin" [size]="16" />{{ j.location }}</li>
+          <li><app-icon name="globe" [size]="16" />{{ j.workMode | optionLabel: 'mode' }} · {{ j.type | optionLabel: 'type' }}</li>
+          <li><app-icon name="money" [size]="16" />{{ j.salaryMin | salary: j.salaryMax }} / year</li>
+        </ul>
+        <a [routerLink]="['/jobs', j.id]" class="view-link">View job description</a>
+      </aside>
+    </div>
+  } @else {
+    <app-empty-state icon="search" title="This job is no longer available" text="You can’t apply to a job that has been removed.">
+      <a routerLink="/jobs" class="btn btn-primary">Browse jobs</a>
+    </app-empty-state>
+  }
+</div>

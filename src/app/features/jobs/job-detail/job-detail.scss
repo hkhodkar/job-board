@@ -1,0 +1,272 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: start;
+}
+
+.main,
+.side {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.head {
+  padding: 28px;
+}
+
+.head-top {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.head-text {
+  min-width: 0;
+
+  h1 {
+    font-size: 28px;
+    margin-top: 8px;
+  }
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.company {
+  margin-top: 4px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--c-text-2);
+}
+
+.head > .meta {
+  margin-top: 20px;
+}
+
+.head-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--c-border);
+}
+
+.salary {
+  display: flex;
+  flex-direction: column;
+}
+
+.salary-value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.salary-unit {
+  font-size: 13px;
+  color: var(--c-muted);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.saved {
+  color: var(--c-primary);
+  border-color: var(--c-primary-100);
+  background: var(--c-primary-50);
+}
+
+.applied {
+  background: var(--c-success-50);
+  color: var(--c-success);
+  border-color: #bfe6d5;
+}
+
+.content {
+  padding: 28px;
+
+  h2 {
+    font-size: 18px;
+    margin: 28px 0 12px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  .summary {
+    color: var(--c-text-2);
+    font-size: 15.5px;
+    line-height: 1.65;
+    white-space: pre-line;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 20px;
+    display: grid;
+    gap: 8px;
+    color: var(--c-text-2);
+  }
+
+  li::marker {
+    color: var(--c-primary);
+  }
+
+  .benefits {
+    padding: 0;
+    list-style: none;
+    grid-template-columns: 1fr 1fr;
+
+    li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      color: var(--c-success);
+    }
+
+    li {
+      color: var(--c-text-2);
+    }
+
+    app-icon {
+      color: var(--c-success);
+    }
+  }
+}
+
+.side .card {
+  padding: 22px;
+
+  h2 {
+    font-size: 16px;
+  }
+}
+
+.overview dl {
+  margin: 14px 0 0;
+  display: grid;
+  gap: 10px;
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+  }
+
+  dt {
+    color: var(--c-muted);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: right;
+  }
+}
+
+.company-head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.muted {
+  color: var(--c-muted);
+  font-size: 14px;
+}
+
+.about {
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--c-text-2);
+}
+
+.facts {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--c-text-2);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+.owner-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+
+  .btn {
+    flex: 1;
+  }
+}
+
+.similar {
+  margin-top: 36px;
+
+  h2 {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+}
+
+.similar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .similar-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .head,
+  .content {
+    padding: 20px 16px;
+  }
+
+  .head-top {
+    gap: 14px;
+  }
+
+  .head-text h1 {
+    font-size: 22px;
+  }
+
+  .actions {
+    width: 100%;
+
+    .btn {
+      flex: 1;
+    }
+  }
+
+  .content .benefits {
+    grid-template-columns: 1fr;
+  }
+}

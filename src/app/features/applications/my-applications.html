@@ -1,0 +1,52 @@
+<div class="container page">
+  <div class="page-header">
+    <div>
+      <h1>My applications</h1>
+      <p>Track the jobs you applied to. Everything stays in this browser.</p>
+    </div>
+  </div>
+
+  @if (items().length) {
+    <ul class="apps">
+      @for (a of items(); track a.id) {
+        <li class="card app">
+          <app-company-logo [name]="a.companyName" [color]="a.color" [size]="44" />
+          <div class="app-main">
+            @if (a.job) {
+              <a [routerLink]="['/jobs', a.jobId]" class="app-title">{{ a.jobTitle }}</a>
+            } @else {
+              <span class="app-title">{{ a.jobTitle }} <span class="badge">Closed</span></span>
+            }
+            <span class="company">{{ a.companyName }}</span>
+            <div class="meta">
+              <span><app-icon name="clock" [size]="16" />Applied {{ a.appliedAt | date: 'MMM d, y, HH:mm' }}</span>
+              <span class="file"><app-icon name="file" [size]="16" /><span class="file-name">{{ a.cvName }}</span> · {{ a.cvSize | fileSize }}</span>
+            </div>
+          </div>
+          <div class="app-side">
+            <span class="status"><span class="dot"></span>Submitted</span>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="askWithdraw(a)">Withdraw</button>
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    <app-empty-state
+      icon="send"
+      title="No applications yet"
+      text="When you apply for a job, it shows up here so you can keep track of it."
+    >
+      <a routerLink="/jobs" class="btn btn-primary">Find a job</a>
+    </app-empty-state>
+  }
+
+  @if (toWithdraw(); as a) {
+    <app-confirm-dialog
+      title="Withdraw application?"
+      [message]="'Your application for “' + a.jobTitle + '” will be removed from your list.'"
+      confirmLabel="Withdraw"
+      (confirmed)="withdraw()"
+      (cancelled)="cancelWithdraw()"
+    />
+  }
+</div>

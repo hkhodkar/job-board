@@ -1,0 +1,102 @@
+.apps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.app {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.app-title {
+  font-size: 16.5px;
+  font-weight: 650;
+  color: var(--c-text);
+}
+
+a.app-title:hover {
+  color: var(--c-primary);
+}
+
+.company {
+  font-size: 14px;
+  color: var(--c-text-2);
+}
+
+.meta {
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.file {
+  min-width: 0;
+}
+
+.file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 260px;
+}
+
+.app-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex: none;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--c-success-50);
+  color: var(--c-success);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+@media (max-width: 640px) {
+  .app {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .app-main {
+    flex-basis: calc(100% - 60px);
+  }
+
+  .app-side {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .file-name {
+    max-width: 160px;
+  }
+}
