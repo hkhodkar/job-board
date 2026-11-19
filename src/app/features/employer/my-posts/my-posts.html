@@ -1,0 +1,70 @@
+<div class="container page">
+  <div class="page-header">
+    <div>
+      <h1>My job posts</h1>
+      <p>Jobs you published from this browser. They show up in the job list with a “New” badge.</p>
+    </div>
+    <a routerLink="/employer/new" class="btn btn-primary"><app-icon name="plus" />Post a job</a>
+  </div>
+
+  @if (jobs().length) {
+    <div class="stats">
+      <div class="stat card">
+        <span class="stat-value">{{ jobs().length }}</span>
+        <span class="stat-label">Active {{ jobs().length === 1 ? 'post' : 'posts' }}</span>
+      </div>
+      <div class="stat card">
+        <span class="stat-value">{{ totalApplicants() }}</span>
+        <span class="stat-label">Applicants</span>
+      </div>
+    </div>
+
+    <ul class="posts">
+      @for (job of jobs(); track job.id) {
+        <li class="card post">
+          <app-company-logo [name]="job.companyName" [size]="44" />
+          <div class="post-main">
+            <a [routerLink]="['/jobs', job.id]" class="post-title">{{ job.title }}</a>
+            <div class="meta">
+              <span>{{ job.companyName }}</span>
+              <span><app-icon name="pin" [size]="16" />{{ job.location }}</span>
+              <span>{{ job.workMode | optionLabel: 'mode' }} · {{ job.type | optionLabel: 'type' }}</span>
+              <span>{{ job.salaryMin | salary: job.salaryMax }}</span>
+            </div>
+            <span class="dates">
+              Posted {{ job.postedAt | date: 'MMM d, y' }}
+              @if (job.updatedAt) {
+                · edited {{ job.updatedAt | date: 'MMM d' }}
+              }
+            </span>
+          </div>
+          <div class="post-actions">
+            <a [routerLink]="['/jobs', job.id]" class="btn btn-ghost btn-sm"><app-icon name="eye" />View</a>
+            <a [routerLink]="['/employer', job.id, 'edit']" class="btn btn-outline btn-sm"><app-icon name="edit" />Edit</a>
+            <button type="button" class="btn btn-danger-outline btn-sm" (click)="askDelete(job)">
+              <app-icon name="trash" />Delete
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  } @else {
+    <app-empty-state
+      icon="briefcase"
+      title="You haven’t posted any jobs yet"
+      text="Create your first job post. It takes about two minutes and you can edit it later."
+    >
+      <a routerLink="/employer/new" class="btn btn-primary"><app-icon name="plus" />Post a job</a>
+    </app-empty-state>
+  }
+
+  @if (toDelete(); as job) {
+    <app-confirm-dialog
+      title="Delete this job post?"
+      [message]="'“' + job.title + '” will be removed from the job board. This cannot be undone.'"
+      confirmLabel="Delete post"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()"
+    />
+  }
+</div>

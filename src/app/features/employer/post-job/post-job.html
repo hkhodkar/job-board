@@ -1,0 +1,338 @@
+<div class="container page">
+  @if (notFound()) {
+    <app-empty-state icon="search" title="Job post not found" text="It may have been deleted. You can create a new one instead.">
+      <a routerLink="/employer/new" class="btn btn-primary">Post a job</a>
+      <a routerLink="/employer" class="btn btn-outline">My job posts</a>
+    </app-empty-state>
+  } @else {
+    <a routerLink="/employer" class="back-link"><app-icon name="arrow-left" />My job posts</a>
+    <div class="page-header">
+      <div>
+        <h1>{{ editing() ? 'Edit job post' : 'Post a job' }}</h1>
+        <p>
+          {{ editing() ? 'Changes go live as soon as you save.' : 'Reach candidates in minutes. Your post appears at the top of the job list.' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="layout">
+      <form class="post-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <section class="card form-section">
+          <h2>Basics</h2>
+          <p class="section-desc">The essentials candidates see first.</p>
+          <div class="form-grid">
+            <div class="field">
+              <label class="label" for="title">Job title <span class="req">*</span></label>
+              <input
+                id="title"
+                class="input"
+                type="text"
+                formControlName="title"
+                placeholder="e.g. Senior Angular Developer"
+                [class.invalid]="show(form.controls.title)"
+              />
+              @if (show(form.controls.title)) {
+                <span class="error">
+                  {{ form.controls.title.hasError('required') ? 'Job title is required.' : form.controls.title.hasError('minlength') ? 'Use at least 4 characters.' : 'Keep it under 80 characters.' }}
+                </span>
+              }
+            </div>
+
+            <div class="form-row">
+              <div class="field">
+                <label class="label" for="companyName">Company <span class="req">*</span></label>
+                <input
+                  id="companyName"
+                  class="input"
+                  type="text"
+                  formControlName="companyName"
+                  placeholder="e.g. Acme Labs"
+                  autocomplete="organization"
+                  [class.invalid]="show(form.controls.companyName)"
+                />
+                @if (show(form.controls.companyName)) {
+                  <span class="error">{{ form.controls.companyName.hasError('required') ? 'Company name is required.' : 'Keep it under 60 characters.' }}</span>
+                }
+              </div>
+              <div class="field">
+                <label class="label" for="location">Location <span class="req">*</span></label>
+                <input
+                  id="location"
+                  class="input"
+                  type="text"
+                  formControlName="location"
+                  placeholder="e.g. Berlin, Germany or Remote (EU)"
+                  [class.invalid]="show(form.controls.location)"
+                />
+                @if (show(form.controls.location)) {
+                  <span class="error">{{ form.controls.location.hasError('required') ? 'Location is required.' : 'Keep it under 60 characters.' }}</span>
+                }
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card form-section">
+          <h2>Role details</h2>
+          <p class="section-desc">Used by the filters on the job list.</p>
+          <div class="form-grid">
+            <div class="field">
+              <span class="label" id="workmode-label">Work mode</span>
+              <div class="segmented" role="radiogroup" aria-labelledby="workmode-label">
+                @for (o of modes; track o.value) {
+                  <label>
+                    <input type="radio" formControlName="workMode" [value]="o.value" />
+                    {{ o.label }}
+                  </label>
+                }
+              </div>
+            </div>
+
+            <div class="form-row three">
+              <div class="field">
+                <label class="label" for="type">Job type</label>
+                <select id="type" class="select" formControlName="type">
+                  @for (o of types; track o.value) {
+                    <option [ngValue]="o.value">{{ o.label }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label class="label" for="level">Experience level</label>
+                <select id="level" class="select" formControlName="level">
+                  @for (o of levels; track o.value) {
+                    <option [ngValue]="o.value">{{ o.label }}</option>
+                  }
+                </select>
+              </div>
+              <div class="field">
+                <label class="label" for="category">Category <span class="req">*</span></label>
+                <select
+                  id="category"
+                  class="select"
+                  formControlName="category"
+                  [class.empty]="!value().category"
+                  [class.invalid]="show(form.controls.category)"
+                >
+                  <option value="" disabled>Select a category</option>
+                  @for (o of categories; track o.value) {
+                    <option [ngValue]="o.value">{{ o.label }}</option>
+                  }
+                </select>
+                @if (show(form.controls.category)) {
+                  <span class="error">Choose a category.</span>
+                }
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card form-section" formGroupName="salary">
+          <h2>Salary</h2>
+          <p class="section-desc">Yearly gross salary in USD. Posts with a salary get up to 3× more applicants.</p>
+          <div class="form-row">
+            <div class="field">
+              <label class="label" for="salaryMin">Minimum <span class="req">*</span></label>
+              <div class="input-affix">
+                <span class="affix">$</span>
+                <input
+                  id="salaryMin"
+                  class="input"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  step="1000"
+                  formControlName="salaryMin"
+                  placeholder="e.g. 70000"
+                  [class.invalid]="show(salary.controls.salaryMin) || showSalaryRange()"
+                />
+              </div>
+              @if (show(salary.controls.salaryMin)) {
+                <span class="error">{{ salaryError(salary.controls.salaryMin, 'Minimum') }}</span>
+              }
+            </div>
+            <div class="field">
+              <label class="label" for="salaryMax">Maximum <span class="req">*</span></label>
+              <div class="input-affix">
+                <span class="affix">$</span>
+                <input
+                  id="salaryMax"
+                  class="input"
+                  type="number"
+                  inputmode="numeric"
+                  min="0"
+                  step="1000"
+                  formControlName="salaryMax"
+                  placeholder="e.g. 90000"
+                  [class.invalid]="show(salary.controls.salaryMax) || showSalaryRange()"
+                />
+              </div>
+              @if (show(salary.controls.salaryMax)) {
+                <span class="error">{{ salaryError(salary.controls.salaryMax, 'Maximum') }}</span>
+              } @else if (showSalaryRange()) {
+                <span class="error" role="alert">Maximum must be greater than or equal to the minimum.</span>
+              }
+            </div>
+          </div>
+        </section>
+
+        <section class="card form-section">
+          <h2>Description</h2>
+          <p class="section-desc">What the role is about, the team and what makes it interesting.</p>
+          <div class="form-grid">
+            <div class="field">
+              <label class="label" for="description">About the role <span class="req">*</span></label>
+              <textarea
+                id="description"
+                class="textarea"
+                rows="7"
+                formControlName="description"
+                placeholder="Describe the team, the product and what the new hire will work on in the first months."
+                [class.invalid]="show(form.controls.description)"
+              ></textarea>
+              <div class="field-footer">
+                @if (show(form.controls.description)) {
+                  <span class="error">
+                    {{ form.controls.description.hasError('required') ? 'Description is required.' : form.controls.description.hasError('minlength') ? 'Please write at least ' + descMin + ' characters.' : 'Keep it under ' + descMax + ' characters.' }}
+                  </span>
+                } @else {
+                  <span class="hint">At least {{ descMin }} characters.</span>
+                }
+                <span class="counter" [class.over]="descLength() > descMax">{{ descLength() }} / {{ descMax }}</span>
+              </div>
+            </div>
+
+            <div class="field" formArrayName="requirements">
+              <span class="label" id="req-label">Requirements <span class="req">*</span></span>
+              <ul class="req-list" aria-labelledby="req-label">
+                @for (ctrl of requirements.controls; track ctrl; let i = $index) {
+                  <li class="req-item">
+                    <span class="bullet" aria-hidden="true"></span>
+                    <input
+                      class="input"
+                      type="text"
+                      [id]="'req-' + i"
+                      [formControlName]="i"
+                      [attr.aria-label]="'Requirement ' + (i + 1)"
+                      placeholder="e.g. 3+ years with TypeScript"
+                      [class.invalid]="show(ctrl)"
+                      (keydown.enter)="onRequirementEnter($event, i)"
+                    />
+                    <button
+                      type="button"
+                      class="icon-btn"
+                      [attr.aria-label]="'Remove requirement ' + (i + 1)"
+                      (click)="removeRequirement(i)"
+                    >
+                      <app-icon name="trash" [size]="16" />
+                    </button>
+                  </li>
+                  @if (show(ctrl)) {
+                    <li class="req-error error">
+                      {{ ctrl.hasError('required') ? 'Fill in this requirement or remove it.' : 'Keep it under 160 characters.' }}
+                    </li>
+                  }
+                }
+              </ul>
+              <div class="req-footer">
+                <button
+                  type="button"
+                  class="btn btn-outline btn-sm"
+                  (click)="addRequirement()"
+                  [disabled]="requirements.length >= maxRequirements"
+                >
+                  <app-icon name="plus" />Add requirement
+                </button>
+                <span class="hint">{{ requirements.length }} / {{ maxRequirements }} · press Enter for a new line</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="tags">Skills &amp; tags <span class="req">*</span></label>
+              <app-tag-input
+                formControlName="tags"
+                inputId="tags"
+                placeholder="Type a skill and press Enter"
+                [max]="maxTags"
+                [invalid]="show(form.controls.tags)"
+              />
+              @if (show(form.controls.tags)) {
+                <span class="error">Add at least one tag, e.g. Angular.</span>
+              } @else {
+                <span class="hint">Up to {{ maxTags }} tags. Press Enter or comma to add, Backspace to remove.</span>
+              }
+            </div>
+          </div>
+        </section>
+
+        <div class="submit-bar">
+          @if (submitted() && form.invalid) {
+            <span class="error summary-error"><app-icon name="alert" [size]="16" />Please fix the highlighted fields.</span>
+          }
+          <a routerLink="/employer" class="btn btn-ghost btn-lg">Cancel</a>
+          <button type="submit" class="btn btn-primary btn-lg">
+            <app-icon [name]="editing() ? 'check' : 'send'" />
+            {{ editing() ? 'Save changes' : 'Publish job' }}
+          </button>
+        </div>
+      </form>
+
+      @let p = preview();
+      <aside class="preview" aria-label="Live preview">
+        <div class="preview-label"><app-icon name="eye" [size]="16" />Live preview</div>
+        <article class="card preview-card">
+          <div class="preview-head">
+            <app-company-logo [name]="p.company" [size]="48" />
+            <div class="preview-title">
+              <span class="badge badge-new">New</span>
+              <h2 [class.placeholder]="!value().title?.trim()">{{ p.title }}</h2>
+              <p [class.placeholder]="!value().companyName?.trim()">{{ p.company }}</p>
+            </div>
+          </div>
+          <div class="meta">
+            <span><app-icon name="pin" [size]="16" />{{ p.location }}</span>
+            <span><app-icon name="globe" [size]="16" />{{ p.workMode | optionLabel: 'mode' }}</span>
+            <span><app-icon name="briefcase" [size]="16" />{{ p.type | optionLabel: 'type' }}</span>
+            <span><app-icon name="layers" [size]="16" />{{ p.level | optionLabel: 'level' }}</span>
+          </div>
+          <div class="preview-salary">
+            @if (p.salaryMin != null || p.salaryMax != null) {
+              {{ p.salaryMin | salary: p.salaryMax }} <small>/ year</small>
+            } @else {
+              <span class="placeholder">Salary range</span>
+            }
+            @if (p.category) {
+              <span class="badge badge-primary">{{ p.category | optionLabel: 'category' }}</span>
+            }
+          </div>
+
+          <h3>About the role</h3>
+          @if (p.description) {
+            <p class="preview-desc">{{ p.description }}</p>
+          } @else {
+            <p class="placeholder">Your description will appear here.</p>
+          }
+
+          <h3>Requirements</h3>
+          @if (p.requirements.length) {
+            <ul>
+              @for (r of p.requirements; track $index) {
+                <li>{{ r }}</li>
+              }
+            </ul>
+          } @else {
+            <p class="placeholder">Add at least one requirement.</p>
+          }
+
+          @if (p.tags.length) {
+            <div class="tags preview-tags">
+              @for (t of p.tags; track t) {
+                <span class="tag">{{ t }}</span>
+              }
+            </div>
+          }
+        </article>
+      </aside>
+    </div>
+  }
+</div>
