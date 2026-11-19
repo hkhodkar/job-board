@@ -1,0 +1,43 @@
+<input
+  #fileInput
+  class="sr-only"
+  type="file"
+  tabindex="-1"
+  [id]="inputId()"
+  [accept]="accept()"
+  [disabled]="disabled()"
+  (change)="onSelected($event)"
+/>
+
+@if (file(); as f) {
+  <div class="file" [class.invalid]="invalid()">
+    <span class="file-icon"><app-icon name="file" [size]="22" /></span>
+    <div class="file-info">
+      <span class="file-name" [title]="f.name">{{ f.name }}</span>
+      <span class="file-size">{{ f.size | fileSize }}</span>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm replace" (click)="browse()" [disabled]="disabled()">Replace</button>
+    <button type="button" class="icon-btn remove" aria-label="Remove file" (click)="remove()" [disabled]="disabled()">
+      <app-icon name="x" [size]="16" />
+    </button>
+  </div>
+} @else {
+  <div
+    class="zone"
+    [class.dragging]="dragging()"
+    [class.invalid]="invalid()"
+    (dragover)="onDragOver($event)"
+    (dragenter)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <span class="zone-icon"><app-icon name="upload" [size]="22" /></span>
+    <p class="zone-title">
+      Drag &amp; drop your CV here or
+      <button type="button" class="link" (click)="browse()" [disabled]="disabled()">browse files</button>
+    </p>
+    @if (hint()) {
+      <p class="zone-hint">{{ hint() }}</p>
+    }
+  </div>
+}

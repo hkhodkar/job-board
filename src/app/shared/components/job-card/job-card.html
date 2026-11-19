@@ -1,0 +1,52 @@
+@let j = job();
+<article class="job-card" [class.compact]="compact()" [class.own]="j.isOwn">
+  <app-company-logo [name]="j.company.name" [color]="j.company.color" [size]="compact() ? 40 : 48" />
+
+  <div class="body">
+    <div class="top">
+      <div class="heading">
+        <h3 class="title">
+          <a [routerLink]="['/jobs', j.id]" class="stretched">{{ j.title }}</a>
+        </h3>
+        <p class="company">{{ j.company.name }}</p>
+      </div>
+      <button
+        type="button"
+        class="icon-btn save"
+        [class.active]="isSaved()"
+        [attr.aria-pressed]="isSaved()"
+        [attr.aria-label]="isSaved() ? 'Remove ' + j.title + ' from saved jobs' : 'Save ' + j.title"
+        [title]="isSaved() ? 'Saved' : 'Save job'"
+        (click)="toggleSave()"
+      >
+        <app-icon [name]="isSaved() ? 'bookmark-filled' : 'bookmark'" />
+      </button>
+    </div>
+
+    <div class="meta">
+      <span><app-icon name="pin" [size]="16" />{{ j.location }}</span>
+      <span><app-icon name="briefcase" [size]="16" />{{ j.type | optionLabel: 'type' }}</span>
+      @if (!compact()) {
+        <span><app-icon name="layers" [size]="16" />{{ j.level | optionLabel: 'level' }}</span>
+      }
+    </div>
+
+    <div class="badges">
+      @if (j.isOwn) {
+        <span class="badge badge-new">New</span>
+      }
+      <span class="badge mode" [attr.data-mode]="j.workMode">{{ j.workMode | optionLabel: 'mode' }}</span>
+      @if (applied()) {
+        <span class="badge badge-primary"><app-icon name="check" [size]="13" />Applied</span>
+      }
+      @for (tag of visibleTags(); track tag) {
+        <span class="tag">{{ tag }}</span>
+      }
+    </div>
+
+    <div class="bottom">
+      <span class="salary">{{ j.salaryMin | salary: j.salaryMax }}<small> / year</small></span>
+      <span class="posted">{{ j.postedAt | timeAgo }}</span>
+    </div>
+  </div>
+</article>
