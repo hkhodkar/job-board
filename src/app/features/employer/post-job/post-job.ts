@@ -139,6 +139,10 @@ export class PostJob {
 
   protected readonly preview = computed(() => {
     const v = this.value();
+    const min = v.salary?.salaryMin ?? null;
+    const max = v.salary?.salaryMax ?? null;
+    // an inverted range stays out of the preview until it is fixed
+    const inverted = min != null && max != null && min > max;
     return {
       title: v.title?.trim() || 'Job title',
       company: v.companyName?.trim() || 'Your company',
@@ -147,8 +151,8 @@ export class PostJob {
       type: v.type ?? 'full-time',
       level: v.level ?? 'mid',
       category: v.category || '',
-      salaryMin: v.salary?.salaryMin ?? null,
-      salaryMax: v.salary?.salaryMax ?? null,
+      salaryMin: inverted ? null : min,
+      salaryMax: inverted ? null : max,
       description: v.description?.trim() || '',
       requirements: (v.requirements ?? []).map((r) => r?.trim()).filter((r): r is string => !!r),
       tags: v.tags ?? [],
